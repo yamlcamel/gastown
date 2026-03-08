@@ -17,7 +17,7 @@ func isClaudeCmd(cmd string) bool {
 func TestBuiltinPresets(t *testing.T) {
 	t.Parallel()
 	// Ensure all built-in presets are accessible
-	presets := []AgentPreset{AgentClaude, AgentGemini, AgentCodex, AgentCursor, AgentAuggie, AgentAmp, AgentOpenCode, AgentCopilot, AgentPi, AgentOmp}
+	presets := []AgentPreset{AgentClaude, AgentGemini, AgentCodex, AgentCursor, AgentAuggie, AgentAmp, AgentOpenCode, AgentCopilot, AgentPi, AgentOmp, AgentDroid}
 
 	for _, preset := range presets {
 		info := GetAgentPreset(preset)
@@ -55,6 +55,7 @@ func TestGetAgentPresetByName(t *testing.T) {
 		{"copilot", AgentCopilot, false},   // Built-in GitHub Copilot CLI agent
 		{"pi", AgentPi, false},             // Pi Coding Agent
 		{"omp", AgentOmp, false},           // Oh My Pi
+		{"droid", AgentDroid, false},
 		{"unknown", "", true},
 	}
 
@@ -138,6 +139,7 @@ func TestIsKnownPreset(t *testing.T) {
 		{"copilot", true},   // Built-in GitHub Copilot CLI agent
 		{"pi", true},        // Pi Coding Agent
 		{"omp", true},       // Oh My Pi
+		{"droid", true},     // Droid
 		{"unknown", false},
 		{"chatgpt", false},
 	}
@@ -630,7 +632,7 @@ func TestGetProcessNames(t *testing.T) {
 func TestListAgentPresetsMatchesConstants(t *testing.T) {
 	t.Parallel()
 	// Ensure all AgentPreset constants are returned by ListAgentPresets
-	allConstants := []AgentPreset{AgentClaude, AgentGemini, AgentCodex, AgentCursor, AgentAuggie, AgentAmp, AgentOpenCode, AgentCopilot, AgentPi}
+	allConstants := []AgentPreset{AgentClaude, AgentGemini, AgentCodex, AgentCursor, AgentAuggie, AgentAmp, AgentOpenCode, AgentCopilot, AgentPi, AgentOmp, AgentDroid}
 	presets := ListAgentPresets()
 
 	// Convert to map for quick lookup
@@ -1256,5 +1258,63 @@ func TestAllHookSupportingAgentsHaveHookFields(t *testing.T) {
 		if preset.HooksSettingsFile == "" {
 			t.Errorf("agent %q: SupportsHooks=true but HooksSettingsFile is empty", name)
 		}
+	}
+}
+
+func TestDroidAgentPreset(t *testing.T) {
+	ResetRegistryForTesting()
+	defer ResetRegistryForTesting()
+
+	info := GetAgentPreset(AgentDroid)
+	if info == nil {
+		t.Fatal("Droid preset not found")
+	}
+
+	// Verify autonomous flag
+	if len(info.Args) == 0 || info.Args[0] != "--skip-permissions-unsafe" {
+		t.Errorf("expected --skip-permissions-unsafe, got %v", info.Args)
+	}
+
+	// Verify native binary process detection
+	if len(info.ProcessNames) != 1 || info.ProcessNames[0] != "droid" {
+		t.Errorf("expected [droid] process names, got %v", info.ProcessNames)
+	}
+
+	// Verify hooks support
+	if !info.SupportsHooks {
+		t.Error("expected SupportsHooks = true")
+	}
+	if info.HooksProvider != "droid" {
+		t.Errorf("expected HooksProvider = droid, got %s", info.HooksProvider)
+	}
+	if info.HooksDir != ".factory" {
+		t.Errorf("expected HooksDir = .factory, got %s", info.HooksDir)
+	}
+	if info.HooksSettingsFile != "settings.json" {
+		t.Errorf("expected HooksSettingsFile = settings.json, got %s", info.HooksSettingsFile)
+	}
+
+	// Verify non-interactive config
+	if info.NonInteractive == nil {
+		t.Fatal("expected NonInteractive config")
+	}
+	if info.NonInteractive.Subcommand != "exec" {
+		t.Errorf("expected Subcommand = exec, got %s", info.NonInteractive.Subcommand)
+	}
+	if info.NonInteractive.OutputFlag != "--output-format json" {
+		t.Errorf("expected OutputFlag = --output-format json, got %s", info.NonInteractive.OutputFlag)
+	}
+
+	// Verify config dir for slash command provisioning
+	if info.ConfigDir != ".factory" {
+		t.Errorf("expected ConfigDir = .factory, got %s", info.ConfigDir)
+	}
+
+	// Verify resume support
+	if info.ResumeFlag != "--resume" {
+		t.Errorf("expected ResumeFlag = --resume, got %s", info.ResumeFlag)
+	}
+	if info.ResumeStyle != "flag" {
+		t.Errorf("expected ResumeStyle = flag, got %s", info.ResumeStyle)
 	}
 }
