@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "agents": {
+    "droid": {
+      "name": "droid",
+      "command": "droid",
+      "args": ["--skip-permissions-unsafe"],
+      "process_names": ["droid"],
+      "resume_flag": "--resume",
+      "resume_style": "flag",
+      "supports_hooks": true,
+      "prompt_mode": "arg",
+      "config_dir": ".factory",
+      "hooks_provider": "droid",
+      "hooks_dir": ".factory",
+      "hooks_settings_file": "settings.json",
+      "ready_delay_ms": 5000,
+      "instructions_file": "AGENTS.md",
+      "non_interactive": {
+        "subcommand": "exec",
+        "output_flag": "--output-format json"
+      }
+    },
+    "droid-haiku": {
+      "name": "droid-haiku",
+      "command": "droid",
+      "args": ["--skip-permissions-unsafe", "-m", "claude-haiku-4-5-20251001"],
+      "process_names": ["droid"],
+      "resume_flag": "--resume",
+      "resume_style": "flag",
+      "supports_hooks": true,
+      "prompt_mode": "arg",
+      "config_dir": ".factory",
+      "hooks_provider": "droid",
+      "hooks_dir": ".factory",
+      "hooks_settings_file": "settings.json",
+      "ready_delay_ms": 5000,
+      "instructions_file": "AGENTS.md",
+      "non_interactive": {
+        "subcommand": "exec",
+        "output_flag": "--output-format json"
+      }
+    },
+    "droid-gpt": {
+      "name": "droid-gpt",
+      "command": "droid",
+      "args": ["--skip-permissions-unsafe", "-m", "gpt-5.2"],
+      "process_names": ["droid"],
+      "resume_flag": "--resume",
+      "resume_style": "flag",
+      "supports_hooks": true,
+      "prompt_mode": "arg",
+      "config_dir": ".factory",
+      "hooks_provider": "droid",
+      "hooks_dir": ".factory",
+      "hooks_settings_file": "settings.json",
+      "ready_delay_ms": 5000,
+      "instructions_file": "AGENTS.md",
+      "non_interactive": {
+        "subcommand": "exec",
+        "output_flag": "--output-format json"
+      }
+    }
+  }
+}
