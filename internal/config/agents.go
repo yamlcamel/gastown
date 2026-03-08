@@ -36,6 +36,8 @@ const (
 	// AgentOmp is Oh My Pi (OMP) — Pi fork with hook-based lifecycle.
 	// Inspired by github.com/ProbabilityEngineer/pi-mono gastown integration.
 	AgentOmp AgentPreset = "omp"
+	// AgentDroid is Factory Droid CLI.
+	AgentDroid AgentPreset = "droid"
 )
 
 // AgentPresetInfo contains the configuration details for an agent preset.
@@ -371,6 +373,29 @@ var builtinPresets = map[AgentPreset]*AgentPresetInfo{
 		NonInteractive: &NonInteractiveConfig{
 			PromptFlag: "--prompt",
 		},
+	},
+	AgentDroid: {
+		Name:                AgentDroid,
+		Command:             "droid",
+		Args:                []string{"--skip-permissions-unsafe"},
+		ProcessNames:        []string{"droid"},        // Native arm64 binary
+		SessionIDEnv:        "",                        // Droid stores sessions in ~/.factory/sessions/
+		ResumeFlag:          "--resume",
+		ResumeStyle:         "flag",
+		SupportsHooks:       true,
+		SupportsForkSession: false,                     // Not confirmed in Droid docs
+		NonInteractive: &NonInteractiveConfig{
+			Subcommand: "exec",
+			OutputFlag: "--output-format json",
+		},
+		// Runtime defaults
+		PromptMode:        "arg",
+		ConfigDir:         ".factory",
+		HooksProvider:     "droid",
+		HooksDir:          ".factory",
+		HooksSettingsFile: "settings.json",
+		ReadyDelayMs:      5000,
+		InstructionsFile:  "AGENTS.md",
 	},
 }
 
