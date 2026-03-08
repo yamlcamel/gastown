@@ -47,6 +47,10 @@ var Commands = []Command{
 				{"allowed-tools", "Bash(gt handoff:*)"},
 				{"argument-hint", "[message]"},
 			},
+			"droid": {
+				{"allowed-tools", "Bash(gt handoff:*)"},
+				{"argument-hint", "[message]"},
+			},
 			// opencode: no extra fields, just description
 		},
 	},
