@@ -3,6 +3,7 @@ package hooks
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -211,5 +212,58 @@ func TestInstallForRole_CopilotRoleAware(t *testing.T) {
 	want, _ = templateFS.ReadFile("templates/copilot/gastown-interactive.json")
 	if string(got) != string(want) {
 		t.Error("copilot interactive: content mismatch")
+	}
+}
+
+func TestInstallForRole_DroidRoleAware(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Autonomous role (polecat) should get settings-autonomous.json
+	err := InstallForRole("droid", "", tmpDir, "polecat", ".factory", "settings.json", false)
+	if err != nil {
+		t.Fatalf("InstallForRole failed: %v", err)
+	}
+
+	path := filepath.Join(tmpDir, ".factory", "settings.json")
+	content, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("reading installed file: %v", err)
+	}
+
+	// Verify it contains Gas Town hooks
+	if !strings.Contains(string(content), "gt prime --hook") {
+		t.Error("autonomous template missing gt prime --hook")
+	}
+	if !strings.Contains(string(content), "gt mail check --inject") {
+		t.Error("autonomous template missing gt mail check --inject")
+	}
+	if !strings.Contains(string(content), "gt tap guard pr-workflow") {
+		t.Error("autonomous template missing gt tap guard pr-workflow")
+	}
+	if !strings.Contains(string(content), "gt costs record") {
+		t.Error("autonomous template missing gt costs record")
+	}
+}
+
+func TestInstallForRole_DroidUsesWorkDir(t *testing.T) {
+	tmpSettings := t.TempDir()
+	tmpWork := t.TempDir()
+
+	// Droid uses workDir (useSettingsDir=false), not settingsDir
+	err := InstallForRole("droid", tmpSettings, tmpWork, "polecat", ".factory", "settings.json", false)
+	if err != nil {
+		t.Fatalf("InstallForRole failed: %v", err)
+	}
+
+	// Should be in workDir
+	workPath := filepath.Join(tmpWork, ".factory", "settings.json")
+	if _, err := os.Stat(workPath); os.IsNotExist(err) {
+		t.Error("expected hooks in workDir, not found")
+	}
+
+	// Should NOT be in settingsDir
+	settingsPath := filepath.Join(tmpSettings, ".factory", "settings.json")
+	if _, err := os.Stat(settingsPath); err == nil {
+		t.Error("hooks should not be in settingsDir for Droid")
 	}
 }
