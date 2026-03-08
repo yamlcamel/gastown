@@ -65,6 +65,9 @@ settings/
 .sqlhistory
 .fork-integration.json
 
+# Worktrees
+.worktrees/
+
 # Nix build
 result
 
